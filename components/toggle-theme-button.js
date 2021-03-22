@@ -13,6 +13,7 @@ export default function ToggleThemeButton() {
 
   return (
     <button
+      className="focus:outline-none"
       aria-label="Toggle Theme"
       type="button"
       onClick={() => setTheme(toggle.mode)}
