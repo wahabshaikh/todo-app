@@ -10,6 +10,9 @@ import Container from "../components/container";
 export default function Home() {
   const [status, setStatus] = useState("loading");
   const [todos, setTodos] = useState(null);
+  const [allTodos, setAllTodos] = useState(null);
+  const [activeTodos, setActiveTodos] = useState(null);
+  const [completedTodos, setCompletedTodos] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -32,6 +35,12 @@ export default function Home() {
     return () => {
       cancelled = true;
     };
+  }, [status]);
+
+  useEffect(() => {
+    setAllTodos(todos);
+    setActiveTodos(todos?.filter((todo) => !todo.completed));
+    setCompletedTodos(todos?.filter((todo) => todo.completed));
   }, [status]);
 
   const reloadTodos = () => setStatus("loading");
@@ -69,7 +78,15 @@ export default function Home() {
               <div>Loading...</div>
             )}
 
-            <Nav todos={todos} reloadTodos={reloadTodos} />
+            <Nav
+              todos={{
+                all: allTodos,
+                active: activeTodos,
+                completed: completedTodos,
+              }}
+              setTodos={setTodos}
+              reloadTodos={reloadTodos}
+            />
             <small className="text-gray-500 text-center mt-6">
               Drag and drop to reorder list
             </small>
