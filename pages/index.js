@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Head from "next/head";
+import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import axios from "axios";
 import Form from "../components/form";
 import Todo from "../components/todo";
@@ -45,6 +46,16 @@ export default function Home() {
 
   const reloadTodos = () => setStatus("loading");
 
+  const handleOnDragEnd = (result) => {
+    if (!result.destination) return;
+
+    const items = Array.from(todos);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+
+    setTodos(items);
+  };
+
   return (
     <>
       <Head>
@@ -67,13 +78,36 @@ export default function Home() {
         <main className="flex-1 bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
           <Container>
             {todos ? (
-              <ul className="-mt-16 sm:-mt-28 rounded-t-md overflow-hidden">
-                {todos.map((todo) => (
-                  <li key={todo._id}>
-                    <Todo todo={todo} reloadTodos={reloadTodos} />
-                  </li>
-                ))}
-              </ul>
+              <DragDropContext onDragEnd={handleOnDragEnd}>
+                <Droppable droppableId="todos">
+                  {(provided) => (
+                    <ul
+                      {...provided.droppableProps}
+                      ref={provided.innerRef}
+                      className="-mt-16 sm:-mt-28 rounded-t-md overflow-hidden"
+                    >
+                      {todos.map((todo, index) => (
+                        <Draggable
+                          key={todo._id}
+                          draggableId={todo._id}
+                          index={index}
+                        >
+                          {(provided) => (
+                            <li
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                            >
+                              <Todo todo={todo} reloadTodos={reloadTodos} />
+                            </li>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                    </ul>
+                  )}
+                </Droppable>
+              </DragDropContext>
             ) : (
               <div>Loading...</div>
             )}
